@@ -1,0 +1,4 @@
+SELECT 0, 0, 'abcdefghij' FROM dual
+UNION
+SELECT 1, LEVEL, Regexp_substr('abcdefghij', '.', 1, LEVEL) FROM dual
+CONNECT BY LEVEL <= LENGTH('abcdefghij');
