@@ -1,0 +1,113 @@
+/*
+Необходимо написать сортировку массива строк методом «пузырька» используя PL SQL.
+Оформить в виде кода хранимой процедуры, на вход которой подается массив, возвращается массив.
+В процедуре должна быть обработка двух параметров p_asc, p_nulls_last.
+ 
+declare
+  p_arr dbms_sql.Number_Table;
+  i pls_integer;
+   
+  procedure do_sort(p_arr in out dbms_sql.Number_Table, p_asc in boolean default null, p_nulls_last in boolean default null) is
+  begin
+            return ; — тут код сортировки
+            end;
+ 
+begin
+  p_arr(-1) := 0;
+  p_arr(0) := -2;
+  p_arr(1) := 10.1;
+  p_arr(2) := null;
+  p_arr(3) := 10.1;
+  p_arr(4) := -1;
+  p_arr(6) := -1;
+   
+  do_sort(p_arr);
+   
+  i := p_arr.first;
+   
+  while i is not null loop
+    dbms_output.put_line('arr('||i||') = '||nvl(to_char(p_arr(i)), 'null')||';');
+    i := p_arr.next(i);
+  end loop;
+end;
+ 
+*/
+DECLARE
+  TYPE MY_ARRAY_T IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  VAL_ARRAY MY_ARRAY_T;
+ 
+  FIRST_INDX   NUMBER;
+  CURRENT_INDX NUMBER;
+  NEXT_INDX    NUMBER;
+  A            NUMBER := 0;
+  Z            NUMBER := 1;
+  P_ASC        BOOLEAN := NULL; --восходящий, от min к max
+ 
+  PROCEDURE GO_SORT(DIRTY_ARRAY IN MY_ARRAY_T) IS
+  BEGIN
+    DBMS_OUTPUT.PUT_LINE('sorted');
+  END;
+BEGIN
+ 
+  VAL_ARRAY := MY_ARRAY_T();
+ 
+  VAL_ARRAY(1) := 5;
+  VAL_ARRAY(-2) := 18;
+  VAL_ARRAY(3) := 22;
+  VAL_ARRAY(4) := NULL;
+  VAL_ARRAY(5) := 53;
+  VAL_ARRAY(6) := 55;
+  VAL_ARRAY(-7) := 73;
+  VAL_ARRAY(8) := 34;
+  VAL_ARRAY(9) := NULL;
+  VAL_ARRAY(10) := -100;
+ 
+  /*
+  VAL_ARRAY(1) := 10;
+  VAL_ARRAY(2) := NULL;
+  VAL_ARRAY(3) := 5;
+  VAL_ARRAY(4) := 2;*/
+ 
+  DBMS_OUTPUT.PUT_LINE('Unsort array:');
+ 
+  Z := VAL_ARRAY.FIRST;
+  WHILE Z <= VAL_ARRAY.COUNT LOOP
+    DBMS_OUTPUT.PUT_LINE('indx = ' || Z || '; value = ' || VAL_ARRAY(Z));
+    Z := VAL_ARRAY.NEXT(Z);
+  END LOOP;
+ 
+  CURRENT_INDX := VAL_ARRAY.FIRST;
+  NEXT_INDX    := VAL_ARRAY.NEXT(CURRENT_INDX);
+--  P_ASC        := FALSE;
+  GO_SORT(VAL_ARRAY);
+ 
+  FOR I IN 1 .. VAL_ARRAY.COUNT LOOP
+    FOR J IN 1 .. VAL_ARRAY.COUNT - I LOOP
+      IF (NOT P_ASC AND (VAL_ARRAY(CURRENT_INDX) < VAL_ARRAY(NEXT_INDX) OR       --- > = сортировка по возврастанию (null уезжает в начало)
+         VAL_ARRAY(NEXT_INDX) IS NULL)) OR                                       --- < = сортировка по убыванию (null уезжает в начало)
+         ((P_ASC OR P_ASC IS NULL) AND
+         (VAL_ARRAY(CURRENT_INDX) > VAL_ARRAY(NEXT_INDX) OR
+         VAL_ARRAY(NEXT_INDX) IS NULL)) THEN
+        A := VAL_ARRAY(CURRENT_INDX);
+        VAL_ARRAY(CURRENT_INDX) := VAL_ARRAY(NEXT_INDX);
+        VAL_ARRAY(NEXT_INDX) := A;
+      END IF;
+      CURRENT_INDX := VAL_ARRAY.NEXT(CURRENT_INDX);
+      NEXT_INDX    := VAL_ARRAY.NEXT(CURRENT_INDX);
+    END LOOP;
+   
+    CURRENT_INDX := VAL_ARRAY.FIRST;
+    NEXT_INDX    := VAL_ARRAY.NEXT(CURRENT_INDX);
+  END LOOP;
+ 
+  DBMS_OUTPUT.PUT_LINE('Finish!');
+ 
+  Z := VAL_ARRAY.FIRST;
+  WHILE Z <= VAL_ARRAY.COUNT LOOP
+    DBMS_OUTPUT.PUT_LINE('indx = ' || Z || '; value = ' || VAL_ARRAY(Z));
+    Z := VAL_ARRAY.NEXT(Z);
+  END LOOP;
+ 
+END;
+ 
+/
